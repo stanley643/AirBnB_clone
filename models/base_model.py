@@ -1,10 +1,19 @@
 #!/bin/env python3
 
+"""The Basemodel class for my AirBnB"""
+
 import uuid
-from datetime import datetime
+import models
+from datetimie import datetime
+
 
 class BaseModel:
+    """A class that defines all common attributes of other classes"""
+    id = "[BaseModel]"
+
     def __init__(self):
+        """Instantiation of BaseModel"""
+
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
