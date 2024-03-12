@@ -3,7 +3,7 @@
 import cmd
 from datetime import datetime
 from models.base_model import BaseModel
-from models import FileStorage
+from models.engine.file_storage import FileStorage
 from models.user import User
 from models.state import State
 from models.city import City
@@ -13,6 +13,8 @@ from models.review import Review
 
 class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
+    storage = FileStorage()
+    storage.reload()
 
     def do_quit(self, arg):
         """Exit the program"""
@@ -36,11 +38,6 @@ class HBNBCommand(cmd.Cmd):
 
         class_name = args[0]
         try:
-            # Updated: Check for all classes explicitly
-            if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
-                print("** class doesn't exist **")
-                return
-
             count = len(eval(class_name).all())
             print(count)
         except NameError:
@@ -57,11 +54,6 @@ class HBNBCommand(cmd.Cmd):
 
         class_name = args[0]
         try:
-
-            if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
-                print("** class doesn't exist **")
-                return
-
             new_instance = eval(class_name)()
             new_instance.save()
             print(new_instance.id)
@@ -79,7 +71,6 @@ class HBNBCommand(cmd.Cmd):
 
         class_name_with_show = args[0]
         try:
-
             class_name = class_name_with_show.split('.')[0]
             if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
                 print("** class doesn't exist **")
@@ -91,7 +82,7 @@ class HBNBCommand(cmd.Cmd):
 
             instance_id = class_name_with_show.split('.')[1]
             
-            instance = storage.get(f"{class_name}.{instance_id}")
+            instance = HBNBCommand.storage.get(f"{class_name}.{instance_id}")
             if instance is not None:
                 print(instance)
             else:
@@ -111,7 +102,6 @@ class HBNBCommand(cmd.Cmd):
 
         class_name_with_destroy = args[0]
         try:
-
             class_name = class_name_with_destroy.split('.')[0]
             if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
                 print("** class doesn't exist **")
@@ -124,8 +114,8 @@ class HBNBCommand(cmd.Cmd):
             instance_id = class_name_with_destroy.split('.')[1]
 
             try:
-                del storage.all()[f"{class_name}.{instance_id}"]
-                storage.save()
+                del HBNBCommand.storage.all()[f"{class_name}.{instance_id}"]
+                HBNBCommand.storage.save()
             except KeyError:
                 print("** no instance found **")
 
@@ -143,7 +133,6 @@ class HBNBCommand(cmd.Cmd):
 
         class_name = args[0]
         try:
-
             if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
                 print("** class doesn't exist **")
                 return
@@ -164,7 +153,6 @@ class HBNBCommand(cmd.Cmd):
 
         class_name_with_update = args[0]
         try:
-
             class_name = class_name_with_update.split('.')[0]
             if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
                 print("** class doesn't exist **")
@@ -177,7 +165,7 @@ class HBNBCommand(cmd.Cmd):
             instance_id = class_name_with_update.split('.')[1]
 
             try:
-                instance = storage.all()[f"{class_name}.{instance_id}"]
+                instance = HBNBCommand.storage.all()[f"{class_name}.{instance_id}"]
             except KeyError:
                 print("** no instance found **")
                 return
@@ -190,24 +178,14 @@ class HBNBCommand(cmd.Cmd):
                 print("** value missing **")
                 return
 
-            if args[3][0] != '{' or args[-1][-1] != '}':
+            if args[3][0] != '"' or args[-1][-1] != '"':
                 print("** invalid syntax **")
                 return
 
-            attribute_dict_str = ' '.join(args[3:])
-            try:
-                attribute_dict = eval(attribute_dict_str)
-            except SyntaxError:
-                print("** invalid syntax **")
-                return
+            attribute_name = args[2]
+            attribute_value = ' '.join(args[3:]).strip('"')
 
-            if not isinstance(attribute_dict, dict):
-                print("** invalid syntax **")
-                return
-
-            for key, value in attribute_dict.items():
-                setattr(instance, key, value)
-
+            setattr(instance, attribute_name, attribute_value)
             instance.save()
 
         except NameError:
@@ -217,3 +195,4 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
+

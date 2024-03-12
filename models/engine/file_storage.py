@@ -1,13 +1,4 @@
-#!/usr/bin/python3
-
 import json
-from models.base_model import BaseModel
-from models.user import User
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.place import Place
-from models.review import Review
 
 class FileStorage:
     __file_path = "file.json"
@@ -20,7 +11,7 @@ class FileStorage:
     def new(self, obj):
         """Sets in __objects the obj with key <obj class name>.id"""
         key = "{}.{}".format(obj.__class__.__name__, obj.id)
-        FileStorage.__objects[key] = obj
+        self.__objects[key] = obj
 
     def save(self):
         """Serializes __objects to the JSON file (path: __file_path)."""
@@ -37,7 +28,9 @@ class FileStorage:
                 data = json.load(file)
             for key, value in data.items():
                 cls_name, obj_id = key.split('.')
-                class_dict = eval(cls_name).__dict__.copy()
+                # Import BaseModel here to avoid circular import
+                from models.base_model import BaseModel
+                class_dict = BaseModel.__dict__.copy()
                 del class_dict['__class__']
                 del class_dict['__module__']
                 del class_dict['created_at']
@@ -50,10 +43,8 @@ class FileStorage:
                             value[k] = int(value[k])
                         elif isinstance(class_dict[k], float):
                             value[k] = float(value[k])
-                instance = eval(cls_name)(**value)
+                instance = BaseModel(**value)
                 FileStorage.__objects[key] = instance
         except FileNotFoundError:
             pass
 
-storage = FileStorage()
-storage.reload()
