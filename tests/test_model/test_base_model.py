@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""BaseModel Test case"""
+"""BaseModel test case"""
 
 import unittest
 from datetime import datetime
