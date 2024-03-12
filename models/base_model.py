@@ -1,10 +1,9 @@
 #!/bin/env python3
-
 """The Basemodel class for my AirBnB"""
 
 import uuid
 from datetime import datetime
-from models.engine.file_storage import FileStorage as storage  # Import the variable storage from models
+from models.engine.file_storage import FileStorage as storage  
 
 class BaseModel:
     """A class that defines all common attributes of other classes"""
@@ -24,6 +23,7 @@ class BaseModel:
             self.updated_at = datetime.now()
             storage.new(self, self)  # Call new(self) method on storage for new instances
             
+
 
     def __str__(self):
         return "[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__)
