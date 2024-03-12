@@ -3,7 +3,7 @@
 
 import uuid
 from datetime import datetime
-from models.engine.file_storage import FileStorage as storage  # Import the variable storage from models
+from models.engine.file_storage import FileStorage as storage  
 
 class BaseModel:
     """A class that defines all common attributes of other classes"""
