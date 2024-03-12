@@ -22,7 +22,7 @@ class BaseModel:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-            storage.new(self)  # Call new(self) method on storage for new instances
+            storage.new(self, self)  # Call new(self) method on storage for new instances
             
 
     def __str__(self):
@@ -31,7 +31,7 @@ class BaseModel:
     def save(self):
         """Save the instance"""
         self.updated_at = datetime.now()
-        storage.save()  # Call save() method of storage
+        storage.save(self)  # Call save() method of storage
 
     def to_dict(self):
         """Return a dictionary representation of the instance"""
