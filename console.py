@@ -69,29 +69,24 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
 
-        class_name_with_show = args[0]
-        try:
-            class_name = class_name_with_show.split('.')[0]
-            if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
-                print("** class doesn't exist **")
-                return
-
-            if class_name_with_show.count('.') != 1:
-                print("** invalid syntax **")
-                return
-
-            instance_id = class_name_with_show.split('.')[1]
-            
-            instance = HBNBCommand.storage.get(f"{class_name}.{instance_id}")
-            if instance is not None:
-                print(instance)
-            else:
-                print("** no instance found **")
-
-        except NameError:
+        class_name = args[0]
+        if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
-        except SyntaxError:
-            print("** invalid syntax **")
+            return
+
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+
+        instance_id = args[1]
+        instances = self.storage.all().values()
+        instance = next((inst for inst in instances if inst.__class__.__name__ == class_name and inst.id == instance_id), None)
+    
+        if instance:
+            print(instance)
+        else:
+            print("** no instance found **")
+
 
     def do_destroy(self, arg):
         """Deletes an instance based on the class name and id."""
@@ -100,29 +95,26 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
 
-        class_name_with_destroy = args[0]
-        try:
-            class_name = class_name_with_destroy.split('.')[0]
-            if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
-                print("** class doesn't exist **")
-                return
-
-            if class_name_with_destroy.count('.') != 1:
-                print("** invalid syntax **")
-                return
-
-            instance_id = class_name_with_destroy.split('.')[1]
-
-            try:
-                del HBNBCommand.storage.all()[f"{class_name}.{instance_id}"]
-                HBNBCommand.storage.save()
-            except KeyError:
-                print("** no instance found **")
-
-        except NameError:
+        class_name = args[0]
+        if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
-        except SyntaxError:
-            print("** invalid syntax **")
+            return
+
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+
+        instance_id = args[1]
+        instances = self.storage.all().values()
+        instance = next((inst for inst in instances if inst.__class__.__name__ == class_name and inst.id == instance_id), None)
+
+        if not instance:
+            print("** no instance found **")
+            return
+
+        del self.storage.all()[f"{class_name}.{instance_id}"]
+        self.storage.save()
+
 
     def do_all(self, arg):
         """Prints all string representations of all instances."""
@@ -132,17 +124,14 @@ class HBNBCommand(cmd.Cmd):
             return
 
         class_name = args[0]
-        try:
-            if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
-                print("** class doesn't exist **")
-                return
-
-            instances = eval(class_name).all()
-            print([str(instance) for instance in instances])
-        except NameError:
+        if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
-        except SyntaxError:
-            print("** invalid syntax **")
+            return
+
+        instances = self.storage.all().values()
+        instances_filtered = [str(instance) for instance in instances if instance.__class__.__name__ == class_name]
+
+        print(instances_filtered)
 
     def do_update(self, arg):
         """Updates an instance based on the class name and id."""
@@ -151,47 +140,48 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
 
-        class_name_with_update = args[0]
-        try:
-            class_name = class_name_with_update.split('.')[0]
-            if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
-                print("** class doesn't exist **")
-                return
-
-            if class_name_with_update.count('.') != 1:
-                print("** invalid syntax **")
-                return
-
-            instance_id = class_name_with_update.split('.')[1]
-
-            try:
-                instance = HBNBCommand.storage.all()[f"{class_name}.{instance_id}"]
-            except KeyError:
-                print("** no instance found **")
-                return
-
-            if len(args) < 3:
-                print("** attribute name missing **")
-                return
-
-            if len(args) < 4:
-                print("** value missing **")
-                return
-
-            if args[3][0] != '"' or args[-1][-1] != '"':
-                print("** invalid syntax **")
-                return
-
-            attribute_name = args[2]
-            attribute_value = ' '.join(args[3:]).strip('"')
-
-            setattr(instance, attribute_name, attribute_value)
-            instance.save()
-
-        except NameError:
+        class_name = args[0]
+        if class_name not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
-        except SyntaxError:
-            print("** invalid syntax **")
+            return
+
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+
+        instance_id = args[1]
+        instances = self.storage.all().values()
+        instance = next((inst for inst in instances if inst.__class__.__name__ == class_name and inst.id == instance_id), None)
+
+        if not instance:
+            print("** no instance found **")
+            return
+
+        if len(args) < 4:
+            print("** attribute name missing **")
+            return
+
+        if len(args) < 5:
+            print("** value missing **")
+            return
+
+        attribute_name = args[2]
+        attribute_value = ' '.join(args[3:]).strip('"')
+
+        if attribute_name in ['id', 'created_at', 'updated_at']:
+            print("** cannot update id, created_at, or updated_at **")
+            return
+
+        if hasattr(instance, attribute_name):
+            attribute_type = type(getattr(instance, attribute_name))
+            try:
+                setattr(instance, attribute_name, attribute_type(attribute_value))
+                instance.save()
+            except (ValueError, TypeError):
+                print("** invalid value type **")
+        else:
+            print("** attribute doesn't exist **")
+
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()

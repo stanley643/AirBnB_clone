@@ -18,10 +18,10 @@ class BaseModel:
             self.created_at = datetime.strptime(kwargs['created_at'], "%Y-%m-%dT%H:%M:%S.%f")
             self.updated_at = datetime.strptime(kwargs['updated_at'], "%Y-%m-%dT%H:%M:%S.%f")
         else:
-            self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
+            self.id = str(uuid.uuid4())
             self.updated_at = datetime.now()
-            storage.new(self)  # Call new(self) method on storage for new instances
+            storage.new(self, self)  # Call new(self) method on storage for new instances
             
 
 
@@ -31,13 +31,13 @@ class BaseModel:
     def save(self):
         """Save the instance"""
         self.updated_at = datetime.now()
-        storage.save()  # Call save() method of storage
+        storage.save(self)  # Call save() method of storage
 
     def to_dict(self):
         """Return a dictionary representation of the instance"""
         obj_dict = self.__dict__.copy()
-        obj_dict['__class__'] = self.__class__.__name__
         obj_dict['created_at'] = self.created_at.isoformat()
+        obj_dict['__class__'] = self.__class__.__name__
         obj_dict['updated_at'] = self.updated_at.isoformat()
         return obj_dict
 

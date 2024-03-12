@@ -11,7 +11,7 @@ class FileStorage:
     def new(self, obj):
         """Sets in __objects the obj with key <obj class name>.id"""
         key = "{}.{}".format(obj.__class__.__name__, obj.id)
-        self.__objects[key] = obj
+        FileStorage.__objects[key] = obj
 
     def save(self):
         """Serializes __objects to the JSON file (path: __file_path)."""
@@ -31,10 +31,13 @@ class FileStorage:
                 # Import BaseModel here to avoid circular import
                 from models.base_model import BaseModel
                 class_dict = BaseModel.__dict__.copy()
-                del class_dict['__class__']
+                if '__class__' in class_dict:
+                    del class_dict['__class__']
+                if 'created_at' in class_dict:  # Check if 'created_at' exists in class_dict
+                    del class_dict['created_at']
+                if 'updated_at' in class_dict:  # Check if 'updated_at' exists in class_dict
+                    del class_dict['updated_at']
                 del class_dict['__module__']
-                del class_dict['created_at']
-                del class_dict['updated_at']
                 for k, v in value.items():
                     if k in class_dict:
                         if isinstance(class_dict[k], str):
@@ -47,4 +50,5 @@ class FileStorage:
                 FileStorage.__objects[key] = instance
         except FileNotFoundError:
             pass
+
 
