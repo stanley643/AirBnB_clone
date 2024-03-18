@@ -1,0 +1,14 @@
+header {
+    background-color: #FF0000;
+    height: 70px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+header span {
+    margin: auto;
+    color: black;
+}
+
